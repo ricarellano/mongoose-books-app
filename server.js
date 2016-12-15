@@ -23,32 +23,74 @@ app.get('/', function (req, res) {
 // get all books
 app.get('/api/books', function (req, res) {
   // send all books as JSON response
-  db.Book.find(function(err, books){
-    if (err) { return console.log("index error: " + err); }
-    res.json(books);
-  });
+  db.Book.find()
+    // populate fills in the author id with all the author data
+    .populate('author')
+    .exec(function(err, books){
+      if (err) { return console.log("index error: " + err); }
+      res.json(books);
+    });
 });
+// app.get('/api/books', function (req, res) {
+//   // send all books as JSON response
+//   db.Book.find(function(err, books){
+//     if (err) { return console.log("index error: " + err); }
+//     res.json(books);
+//   });
+// });
 
 // get one book
 app.get('/api/books/:id', function (req, res) {
-  // find one book by its id
-  db.Book.findById(req.params.id, function(err, book){
-    if (err) { return console.log("show error: " + err); }
-    res.json(book);
-  });
-});
+  // create new book with form data (`req.body`)
+  var bookId = req.params.id;
+  db.Book.findOne({ _id: bookId }, function(err, foundBook) {
+    if(err){
+      return console.log("show error: " + err);
+    }
+      res.json(foundBook);
+    });
 
+  });
+// app.get('/api/books/:id', function (req, res) {
+//   // find one book by its id
+//   db.Book.findById(req.params.id, function(err, book){
+//     if (err) { return console.log("show error: " + err); }
+//     res.json(book);
+//   });
+// });
 // create new book
 app.post('/api/books', function (req, res) {
   // create new book with form data (`req.body`)
-  var newBook = new db.Book(req.body);
+  var newBook = new db.Book({
+    title: req.body.title,
+    image: req.body.image,
+    releaseDate: req.body.releaseDate,
+  });
+
+// create new book
+db.Author.findOne({name: req.body.author}, function(err, author){
+  newBook.author = author;
   // add newBook to database
   newBook.save(function(err, book){
-    if (err) { return console.log("create error: " + err); }
+    if (err) {
+      return console.log("create error: " + err);
+    }
     console.log("created ", book.title);
     res.json(book);
   });
 });
+
+});
+// app.post('/api/books', function (req, res) {
+//   // create new book with form data (`req.body`)
+//   var newBook = new db.Book(req.body);
+//   // add newBook to database
+//   newBook.save(function(err, book){
+//     if (err) { return console.log("create error: " + err); }
+//     console.log("created ", book.title);
+//     res.json(book);
+//   });
+// });
 
 
 // delete book
