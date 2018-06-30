@@ -45,6 +45,8 @@ app.get('/api/books', function (req, res) {
   });
 });
 
+app.post('/api/books/:book_id/characters', function (req, res)
+
 // get one book
 app.get('/api/books/:id', function (req, res) {
   db.Books.findOne({_id: req.params._id }, function(err, data) {
